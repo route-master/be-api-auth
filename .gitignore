@@ -37,9 +37,5 @@ out/
 .vscode/
 
 ### Configuration ###
-**/resources/**/*.yml
-**/resources/**/*.yml
-**/resources/**/*.properties
-**/resources/**/*.properties
-!**/resources/**/*-test.yml
-!**/resources/**/*-test.properties
+**/resources/**/*-dev.yml
+**/resources/**/*-dev.properties
