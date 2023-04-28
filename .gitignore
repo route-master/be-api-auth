@@ -39,3 +39,5 @@ out/
 ### Configuration ###
 **/resources/**/*-dev.yml
 **/resources/**/*-dev.properties
+**/resources/dev/**/*.yml
+**/resources/dev/**/*.properties
