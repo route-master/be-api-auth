@@ -1,0 +1,10 @@
+springdoc:
+  api-docs:
+    groups:
+      enabled: true
+  swagger-ui:
+    path: /rest-docs
+  group-configs:
+    - group: user
+      paths-to-match:
+        - /**/user/**
