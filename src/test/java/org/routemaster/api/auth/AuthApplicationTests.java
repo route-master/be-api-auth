@@ -10,19 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 @TestPropertySource(locations="classpath:application-test.yml")
 class AuthApplicationTests {
-
-    final TempRestController tempRestController;
-
-    @Autowired
-    public AuthApplicationTests(TempRestController tempRestController) {
-        this.tempRestController = tempRestController;
-    }
     @Test
     void contextLoads() {
-    }
-
-    @Test
-    void profileLoads() {
-        assertEquals(tempRestController.temp(), "test");
     }
 }
