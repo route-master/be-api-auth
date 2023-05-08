@@ -1,1 +1,8 @@
-temp-string: auth-prod
+spring:
+  config:
+    import:
+      - prod/mongodb.yml
+      - prod/email.yml
+      - global/swagger.yml
+  webflux:
+    base-path: /v1
