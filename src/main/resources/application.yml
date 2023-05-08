@@ -4,5 +4,6 @@ spring:
       - prod/mongodb.yml
       - prod/email.yml
       - global/swagger.yml
-  webflux:
-    base-path: /v1
+server:
+  servlet:
+    context-path: /v1

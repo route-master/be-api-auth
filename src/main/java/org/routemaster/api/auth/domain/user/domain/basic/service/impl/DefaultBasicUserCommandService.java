@@ -14,14 +14,21 @@ import org.routemaster.api.auth.domain.user.domain.basic.persistence.BasicUserRe
 import org.routemaster.api.auth.domain.user.domain.basic.service.BasicUserCommandService;
 import org.routemaster.api.auth.domain.user.domain.basic.util.email.BasicUserValidationMailUtils;
 import org.routemaster.api.auth.domain.user.domain.basic.util.mapper.BasicUserReadyMapper;
+import org.routemaster.api.auth.domain.user.util.constant.UserRoleConstant;
+import org.routemaster.sdk.exception.data.roe.ROEFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -33,19 +40,49 @@ public class DefaultBasicUserCommandService implements BasicUserCommandService {
     private final BasicUserReadyMapper basicUserReadyMapper;
     private final BasicUserValidationMailUtils basicUserValidationMailUtils;
     private final JavaMailSender javaMailSender;
+    private final ROEFactory roeFactory;
 
     @Override
     @Transactional
-    public BasicUserReadySecuredResponseVO registerBasicUser(BasicUserCreateVO createVO) {
-        BasicUserReady forCreate = basicUserReadyMapper.fromCreateVO(createVO);
-        BasicUserReady saved = basicUserReadyRepository.save(forCreate);
-        sendValidationCode(saved);
-        Map<String, Object> meta = createRegisterBasicUserMetadata(saved);
-        return basicUserReadyMapper.toBasicUserReadySecuredResponseVO(saved, meta);
+    public Mono<BasicUserReadySecuredResponseVO> registerBasicUser(BasicUserCreateVO createVO) {
+        Set<String> authorities = createVO.getAuthorities();
+        if (hasSingleRoleUser(createVO)) {
+            return registerBasicUserRoleUser(createVO);
+        }
+        throw roeFactory.get(null, null, HttpStatus.BAD_REQUEST);
     }
 
-    @Async
-     void sendValidationCode(BasicUserReady basicUserReady) {
+    private Boolean hasSingleRoleUser(BasicUserCreateVO createVO) {
+        Set<String> authorities = createVO.getAuthorities();
+        return authorities.size() == 1 && authorities.contains(UserRoleConstant.ROLE_USER);
+    }
+
+    private Mono<BasicUserReadySecuredResponseVO> registerBasicUserRoleUser(BasicUserCreateVO createVO) {
+        String username = createVO.getUsername();
+        Mono<Boolean> existsByUsernameMono = basicUserReadyRepository.existsByUsername(username);
+        return existsByUsernameMono.flatMap(existsByUsername -> saveRegisterBasicUser(createVO, existsByUsername));
+    }
+
+    private Mono<BasicUserReadySecuredResponseVO> saveRegisterBasicUser(BasicUserCreateVO createVO, Boolean existsByUsername) {
+        Mono<BasicUserReady> saved = existsByUsername ? updateRegisterBasicUser(createVO) : insertRegisterBasicUser(createVO);
+        return saved
+                .doOnSuccess(this::sendValidationCode)
+                .map(basicUserReadyMapper::toBasicUserReadySecuredResponseVO);
+    }
+
+    private Mono<BasicUserReady> insertRegisterBasicUser(BasicUserCreateVO createVO) {
+        BasicUserReady forCreate = basicUserReadyMapper.fromCreateVO(createVO);
+        return basicUserReadyRepository.save(forCreate);
+    }
+
+    private Mono<BasicUserReady> updateRegisterBasicUser(BasicUserCreateVO createVO) {
+        String username = createVO.getUsername();
+        Mono<BasicUserReady> forUpdateMono = basicUserReadyRepository.findByUsername(username)
+                .map(forUpdate -> basicUserReadyMapper.fromCreateVO(forUpdate, createVO));
+        return forUpdateMono.flatMap(basicUserReadyRepository::save);
+    }
+
+    private void sendValidationCode(BasicUserReady basicUserReady) {
         String email = basicUserReady.getUsername();
         MimeMessage message = javaMailSender.createMimeMessage();
         try {
@@ -59,11 +96,6 @@ public class DefaultBasicUserCommandService implements BasicUserCommandService {
         }
 
         javaMailSender.send(message);
-    }
-
-    private Map<String, Object> createRegisterBasicUserMetadata(BasicUserReady basicUserReady) {
-        Map<String, Object> meta = new HashMap<>();
-        return meta;
     }
 
     @Override

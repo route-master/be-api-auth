@@ -18,6 +18,6 @@ public class BasicUserValidationMailUtils {
     }
 
     public String createText(BasicUserReady basicUserReady) {
-        return TEXT.replace("{}", basicUserReady.getValidationCode());
+        return TEXT.replace("{}", basicUserReady.getVerificationCode());
     }
 }
