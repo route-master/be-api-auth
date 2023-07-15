@@ -1,10 +1,17 @@
 springdoc:
+  version: '@project.version@'
   api-docs:
-    groups:
-      enabled: true
+    path: /api-docs
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
   swagger-ui:
-    path: /rest-docs
-  group-configs:
-    - group: user
-      paths-to-match:
-        - /**/user/**
+    operations-sorter: alpha
+    tags-sorter: alpha
+    path: /swagger-ui.html
+    disable-swagger-default-url: true
+    display-query-params-without-oauth2: true
+    doc-expansion: none
+  paths-to-match:
+    - /**
+  show-oauth2-endpoints: true
+  show-login-endpoint: true
