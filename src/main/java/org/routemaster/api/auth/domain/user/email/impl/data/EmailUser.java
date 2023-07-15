@@ -1,11 +1,14 @@
-package org.routemaster.api.auth.domain.user.domain.basic.data;
+package org.routemaster.api.auth.domain.user.email.impl.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import java.time.LocalDateTime;
 import lombok.*;
-import org.routemaster.api.auth.domain.user.data.DefaultUserDetails;
-import org.routemaster.api.auth.domain.user.util.constant.UserTimeConstant;
+import org.routemaster.api.auth.domain.user.impl.data.DefaultUserDetails;
+import org.routemaster.api.auth.domain.user.impl.util.constant.UserTime;
+import org.routemaster.api.auth.domain.user.impl.util.constant.UserType;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -14,7 +17,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.io.Serializable;
-import java.time.Duration;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,14 +26,13 @@ import java.util.stream.Collectors;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @Getter
+@ToString
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class BasicUser implements DefaultUserDetails, Serializable {
-    public static final String TYPE = BasicUser.class.getName();
+public class EmailUser implements DefaultUserDetails, Serializable {
 
+    public static final UserType TYPE = UserType.EMAIL_USER;
     private static final long serialVersionUID = (long) TYPE.hashCode();
     @Id
-    @Field("_id")
-    @JsonIgnore
     private String id;
     @Indexed(unique = true)
     @Field(name = "username")
@@ -41,47 +42,51 @@ public class BasicUser implements DefaultUserDetails, Serializable {
     @Field(name = "authorities")
     private Set<String> authorities;
     @Field(name = "created_at")
-    private Long createdAt;
+    private LocalDateTime createdAt;
     @Field(name = "updated_at")
-    private Long updatedAt;
-    @Field(name = "deleted_at")
-    private Long deletedAt;
+    private LocalDateTime updatedAt;
     @Field(name = "password_updated_at")
-    private Long passwordUpdatedAt;
+    private LocalDateTime passwordUpdatedAt;
     @Field(name = "last_active_time")
-    private Long lastActiveTime;
+    private LocalDateTime lastActiveTime;
     @Field(name = "lock_expired_at")
-    private Long lockExpiredAt;
+    private LocalDateTime lockExpiredAt;
+    @Field(name = "refresh_token")
+    private String refreshToken;
 
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        LocalDateTime.now();
         return authorities.stream()
                 .map(authority -> new SimpleGrantedAuthority(authority))
                 .collect(Collectors.toSet());
     }
 
+    @JsonProperty("authorities")
     public Set<String> getStringAuthorities() {
         return authorities;
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        long duration = System.currentTimeMillis() - lastActiveTime;
-        return !Duration.ofMillis(UserTimeConstant.ACCOUNT_EXPIRATION_DURATION - duration)
-                .isNegative();
+        LocalDateTime expiredAt = lastActiveTime.plusDays(UserTime.ACCOUNT_EXPIRATION_DAYS);
+        LocalDateTime now = LocalDateTime.now();
+        return  now.isAfter(expiredAt);
     }
 
     @Override
     public boolean isAccountNonLocked() {
+        LocalDateTime now = LocalDateTime.now();
         return lockExpiredAt == null
-                || lockExpiredAt < System.currentTimeMillis();
+                || now.isBefore(lockExpiredAt);
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        long duration = System.currentTimeMillis() - passwordUpdatedAt;
-        return !Duration.ofMillis(UserTimeConstant.CREDENTIALS_EXPIRATION_DURATION - duration)
-                .isNegative();
+        LocalDateTime expiredAt = passwordUpdatedAt.plusDays(UserTime.CREDENTIALS_EXPIRATION_DAYS);
+        LocalDateTime now = LocalDateTime.now();
+        return  now.isAfter(expiredAt);
     }
 
     @Override
@@ -91,14 +96,15 @@ public class BasicUser implements DefaultUserDetails, Serializable {
                 && isCredentialsNonExpired();
     }
 
+    @JsonIgnore
     @Override
-    public String getType() {
+    public UserType getType() {
         return TYPE;
     }
 
     public void setPassword(String password) {
         this.password = password;
-        this.passwordUpdatedAt = System.currentTimeMillis();
+        this.passwordUpdatedAt = LocalDateTime.now();
         setUpdatedAt();
     }
 
@@ -117,15 +123,17 @@ public class BasicUser implements DefaultUserDetails, Serializable {
         setUpdatedAt();
     }
 
-    public void setDeletedAt() {
-        this.deletedAt = System.currentTimeMillis();
+    private void setUpdatedAt() {
+        this.updatedAt = LocalDateTime.now();
     }
+
 
     public void setLastActiveTime() {
-        this.lastActiveTime = System.currentTimeMillis();
+        this.lastActiveTime = LocalDateTime.now();
     }
 
-    private void setUpdatedAt() {
-        this.updatedAt = System.currentTimeMillis();
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+        setUpdatedAt();
     }
 }
