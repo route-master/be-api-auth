@@ -3,6 +3,7 @@ spring:
     import:
       - prod/mongodb.yml
       - prod/email.yml
+      - prod/jwt.yml
       - prod/oauth2.yml
       - global/swagger.yml
   web:
