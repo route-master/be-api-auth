@@ -3,7 +3,8 @@ spring:
     import:
       - prod/mongodb.yml
       - prod/email.yml
+      - prod/oauth2.yml
       - global/swagger.yml
-server:
-  servlet:
-    context-path: /v1
+  web:
+    rest-controller:
+      prefix: /v1
