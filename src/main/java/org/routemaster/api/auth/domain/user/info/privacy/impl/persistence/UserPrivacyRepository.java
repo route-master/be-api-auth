@@ -11,4 +11,5 @@ public interface UserPrivacyRepository extends MongoRepository<UserPrivacy, Stri
     Optional<UserPrivacy> findByBaseUserIdAndPrivacyGroupId(String baseUserId, String privacyGroupId);
     List<UserPrivacy> findAllByBaseUserId(String baseUserId);
     Boolean existsAllById(Iterable<String> ids);
+    void deleteAllByBaseUserId(String baseUserId);
 }

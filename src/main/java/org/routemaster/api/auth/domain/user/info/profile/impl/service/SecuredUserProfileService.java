@@ -5,8 +5,8 @@ import org.routemaster.api.auth.domain.user.info.profile.impl.data.UserProfile;
 
 public interface SecuredUserProfileService {
 
-    List<UserProfile> list(Iterable<String> ids);
-    List<UserProfile> listByBaseUserId(Iterable<String> baseUserIds);
+    List<UserProfile> list(List<String> ids);
+    List<UserProfile> listByBaseUserId(List<String> baseUserIds);
     UserProfile details(String id);
     UserProfile detailsByBaseUserId(String baseUserId);
 }

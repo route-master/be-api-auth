@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserProfileAccessRepository extends MongoRepository<UserProfileAccess, String> {
 
-    List<UserProfileAccess> findAllByBaseUserId(Iterable<String> baseUserIds);
+    List<UserProfileAccess> findAllByBaseUserIdIn(List<String> baseUserIds);
     Optional<UserProfileAccess> findByBaseUserId(String baseUserId);
     Boolean existsByBaseUserId(String baseUserId);
 }

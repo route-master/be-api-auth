@@ -77,7 +77,6 @@ public class DefaultEmailUserEndpointService implements EmailUserEndpointService
             );
         }
         BaseUser baseUser = baseUserService.details(UserType.EMAIL_USER, emailUser.getId());
-        log.info("{}", baseUser);
         UserJwtUnit tokens = userJwtService.createTokens(emailUser, baseUser.getId());
         emailUserService.updateRefreshToken(emailUser.getId(), tokens.getRefreshToken().getToken());
         return EmailUserLoginResponse.builder()
@@ -90,7 +89,6 @@ public class DefaultEmailUserEndpointService implements EmailUserEndpointService
     public EmailUserUpdatePasswordResponse updatePassword(EmailUserUpdatePasswordRequest request,
         UserJwtPayload payload) {
         EmailUser emailUser = emailUserService.updatePassword(payload.getTypeUserId(), request.getPassword());
-        log.info("{}", emailUser);
         return EmailUserUpdatePasswordResponse.builder()
             .username(emailUser.getUsername())
             .build();

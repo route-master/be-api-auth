@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 @Builder
 @Getter
 @ToString
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class EmailUser implements DefaultUserDetails, Serializable {
 
     public static final UserType TYPE = UserType.EMAIL_USER;

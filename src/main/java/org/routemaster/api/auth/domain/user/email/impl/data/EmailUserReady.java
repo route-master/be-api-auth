@@ -25,7 +25,6 @@ import java.util.Set;
 @Builder
 @Getter
 @ToString
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class EmailUserReady implements Serializable {
 
     public static final UserType TYPE = UserType.EMAIL_USER_READY;

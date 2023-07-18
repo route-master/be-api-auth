@@ -12,4 +12,5 @@ public interface UserPrivacyService {
     List<UserPrivacy> saveAll(Iterable<UserPrivacy> userPrivacies);
     void delete(String id);
     void deleteAll(Iterable<String> ids);
+    void deleteAllByBaseUserId(String baseUserId);
 }

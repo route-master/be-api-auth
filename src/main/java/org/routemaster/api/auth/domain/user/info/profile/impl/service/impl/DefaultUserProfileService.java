@@ -22,13 +22,13 @@ public class DefaultUserProfileService implements UserProfileService {
     private final ROEFactory roeFactory;
 
     @Override
-    public List<UserProfile> list(Iterable<String> ids) {
+    public List<UserProfile> list(List<String> ids) {
         return userProfileRepository.findAllById(ids);
     }
 
     @Override
-    public List<UserProfile> listByBaseUserId(Iterable<String> baseUserIds) {
-        return userProfileRepository.findAllByBaseUserId(baseUserIds);
+    public List<UserProfile> listByBaseUserId(List<String> baseUserIds) {
+        return userProfileRepository.findAllByBaseUserIdIn(baseUserIds);
     }
 
     @Override
@@ -70,13 +70,6 @@ public class DefaultUserProfileService implements UserProfileService {
 
     @Override
     public void deleteByBaseUserId(String baseUserId) {
-        if (!userProfileRepository.existsById(baseUserId)) {
-            throw roeFactory.get(
-                InfoErrorCode.ROE_111,
-                UserProfileErrorDescription.USER_PROFILE_NOT_FOUND,
-                HttpStatus.NOT_FOUND
-            );
-        }
         userProfileRepository.deleteByBaseUserId(baseUserId);
     }
 }

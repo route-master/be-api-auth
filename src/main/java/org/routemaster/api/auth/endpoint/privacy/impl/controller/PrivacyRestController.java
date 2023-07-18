@@ -39,18 +39,4 @@ public class PrivacyRestController {
         }
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
-    @PostMapping("/all")
-    @PreAuthorize("permitAll()")
-    public ResponseEntity<List<Privacy>> saveAll(@RequestBody List<Privacy> privacies) {
-        List<Privacy> response = privacyService.saveAll(privacies);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @PostMapping("/group")
-    @PreAuthorize("permitAll()")
-    public ResponseEntity<PrivacyGroup> saveGroup(@RequestBody PrivacyGroup privacyGroup) {
-        PrivacyGroup response = privacyGroupService.save(privacyGroup);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
 }

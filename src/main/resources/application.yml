@@ -1,4 +1,6 @@
 spring:
+  jackson:
+    property-naming-strategy: LOWER_CAMEL_CASE
   config:
     import:
       - prod/mongodb.yml
@@ -9,3 +11,7 @@ spring:
   web:
     rest-controller:
       prefix: /v1
+
+server:
+  servlet:
+    context-path: /v1

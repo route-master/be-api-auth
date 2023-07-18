@@ -22,13 +22,13 @@ public class DefaultUserProfileAccessService implements UserProfileAccessService
     private final ROEFactory roeFactory;
 
     @Override
-    public List<UserProfileAccess> list(Iterable<String> id) {
+    public List<UserProfileAccess> list(List<String> id) {
         return userProfileAccessRepository.findAllById(id);
     }
 
     @Override
-    public List<UserProfileAccess> listByBaseUserId(Iterable<String> baseUserIds) {
-        return userProfileAccessRepository.findAllByBaseUserId(baseUserIds);
+    public List<UserProfileAccess> listByBaseUserId(List<String> baseUserIds) {
+        return userProfileAccessRepository.findAllByBaseUserIdIn(baseUserIds);
     }
 
     @Override
@@ -70,13 +70,6 @@ public class DefaultUserProfileAccessService implements UserProfileAccessService
 
     @Override
     public void deleteByBaseUserId(String baseUserId) {
-        if (!userProfileAccessRepository.existsByBaseUserId(baseUserId)) {
-            throw roeFactory.get(
-                InfoErrorCode.ROE_111,
-                UserProfileErrorDescription.USER_PROFILE_ACCESS_NOT_FOUND,
-                HttpStatus.NOT_FOUND
-            );
-        }
         userProfileAccessRepository.deleteById(baseUserId);
     }
 }

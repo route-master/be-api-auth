@@ -59,13 +59,6 @@ public class DefaultUserSettingService implements UserSettingService {
 
     @Override
     public void deleteByBaseUserId(String baseUserId) {
-        if (!userSettingRepository.existsByBaseUserId(baseUserId)) {
-            throw roeFactory.get(
-                InfoErrorCode.ROE_111,
-                UserSettingErrorDescription.USER_SETTING_NOT_FOUND,
-                HttpStatus.NOT_FOUND
-            );
-        }
-        userSettingRepository.deleteById(baseUserId);
+        userSettingRepository.deleteByBaseUserId(baseUserId);
     }
 }

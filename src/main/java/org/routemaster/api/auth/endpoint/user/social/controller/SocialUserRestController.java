@@ -1,5 +1,6 @@
 package org.routemaster.api.auth.endpoint.user.social.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,11 +49,12 @@ public class SocialUserRestController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/info")
-    @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<SocialUserDetailsResponse> details(
-        @RequestAttribute(UserJwtAuthenticationFilter.USER_PAYLOAD) UserJwtPayload payload) {
-        SocialUserDetailsResponse details = socialUserEndpointService.details(payload);
-        return new ResponseEntity<>(details, HttpStatus.OK);
-    }
+//    @GetMapping("/info")
+//    @SecurityRequirement(name = "Bearer Authentication")
+//    @PreAuthorize("hasRole('ROLE_USER')")
+//    public ResponseEntity<SocialUserDetailsResponse> details(
+//        @RequestAttribute(UserJwtAuthenticationFilter.USER_PAYLOAD) UserJwtPayload payload) {
+//        SocialUserDetailsResponse details = socialUserEndpointService.details(payload);
+//        return new ResponseEntity<>(details, HttpStatus.OK);
+//    }
 }
