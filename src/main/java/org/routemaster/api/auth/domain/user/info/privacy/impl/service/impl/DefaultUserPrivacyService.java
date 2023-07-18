@@ -79,4 +79,9 @@ public class DefaultUserPrivacyService implements UserPrivacyService {
         }
         userPrivacyRepository.deleteAllById(ids);
     }
+
+    @Override
+    public void deleteAllByBaseUserId(String baseUserId) {
+        userPrivacyRepository.deleteAllByBaseUserId(baseUserId);
+    }
 }

@@ -1,5 +1,6 @@
 package org.routemaster.api.auth.endpoint.user.info.privacy.impl.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,6 +37,7 @@ public class UserPrivacyRestController {
     private final UserPrivacyEndpointService userPrivacyEndpointService;
 
     @GetMapping("/me")
+    @SecurityRequirement(name = "Bearer Authentication")
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<UserPrivacyListResponse> details(
         @RequestAttribute(UserJwtAuthenticationFilter.USER_PAYLOAD) UserJwtPayload payload) {
@@ -43,6 +46,7 @@ public class UserPrivacyRestController {
     }
 
     @PostMapping
+    @SecurityRequirement(name = "Bearer Authentication")
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<UserPrivacySaveResponse> save(
         @RequestAttribute(UserJwtAuthenticationFilter.USER_PAYLOAD) UserJwtPayload payload,
@@ -51,28 +55,31 @@ public class UserPrivacyRestController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping("/list")
-    @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<UserPrivacySaveResponse> saveAll(
-        @RequestAttribute(UserJwtAuthenticationFilter.USER_PAYLOAD) UserJwtPayload payload,
-        @RequestBody UserPrivacySaveAllRequest request) {
-        UserPrivacySaveResponse response = userPrivacyEndpointService.saveAll(payload, request);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+//    @PostMapping("/list")
+//    @SecurityRequirement(name = "Bearer Authentication")
+//    @PreAuthorize("hasRole('ROLE_USER')")
+//    public ResponseEntity<UserPrivacySaveResponse> saveAll(
+//        @RequestAttribute(UserJwtAuthenticationFilter.USER_PAYLOAD) UserJwtPayload payload,
+//        @RequestBody UserPrivacySaveAllRequest request) {
+//        UserPrivacySaveResponse response = userPrivacyEndpointService.saveAll(payload, request);
+//        return new ResponseEntity<>(response, HttpStatus.OK);
+//    }
 
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<UserPrivacyDeleteResponse> delete(@PathVariable String id,
-        @RequestAttribute(UserJwtAuthenticationFilter.USER_PAYLOAD) UserJwtPayload payload) {
-        UserPrivacyDeleteResponse response = userPrivacyEndpointService.delete(id, payload);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+//    @DeleteMapping("/{id}")
+//    @SecurityRequirement(name = "Bearer Authentication")
+//    @PreAuthorize("hasRole('ROLE_USER')")
+//    public ResponseEntity<UserPrivacyDeleteResponse> delete(@PathVariable String id,
+//        @RequestAttribute(UserJwtAuthenticationFilter.USER_PAYLOAD) UserJwtPayload payload) {
+//        UserPrivacyDeleteResponse response = userPrivacyEndpointService.delete(id, payload);
+//        return new ResponseEntity<>(response, HttpStatus.OK);
+//    }
 
-    @DeleteMapping("/list")
-    @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<UserPrivacyDeleteResponse> deleteAll(@RequestParam List<String> ids,
-        @RequestAttribute(UserJwtAuthenticationFilter.USER_PAYLOAD) UserJwtPayload payload) {
-        UserPrivacyDeleteResponse response = userPrivacyEndpointService.deleteAll(ids, payload);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+//    @DeleteMapping("/list")
+//    @SecurityRequirement(name = "Bearer Authentication")
+//    @PreAuthorize("hasRole('ROLE_USER')")
+//    public ResponseEntity<UserPrivacyDeleteResponse> deleteAll(@RequestParam List<String> ids,
+//        @RequestAttribute(UserJwtAuthenticationFilter.USER_PAYLOAD) UserJwtPayload payload) {
+//        UserPrivacyDeleteResponse response = userPrivacyEndpointService.deleteAll(ids, payload);
+//        return new ResponseEntity<>(response, HttpStatus.OK);
+//    }
 }
