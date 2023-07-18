@@ -20,7 +20,6 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @Builder
 @Getter
 @ToString
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class Privacy {
 
     @Id

@@ -6,8 +6,8 @@ import org.routemaster.api.auth.domain.user.info.profile.impl.data.UserProfileAc
 
 public interface UserProfileAccessService {
 
-    List<UserProfileAccess> list(Iterable<String> ids);
-    List<UserProfileAccess> listByBaseUserId(Iterable<String> baseUserIds);
+    List<UserProfileAccess> list(List<String> ids);
+    List<UserProfileAccess> listByBaseUserId(List<String> baseUserIds);
     UserProfileAccess details(String id);
     UserProfileAccess detailsByBaseUserId(String baseUserId);
     UserProfileAccess save(UserProfileAccess userProfileAccess);

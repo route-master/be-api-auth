@@ -18,6 +18,7 @@ public class SecuredUserProfileMapper {
             .nickname(origin.getNickname())
             .birthDate(access.getBirthDate() ? origin.getBirthDate() : null)
             .profileImageUrl(access.getProfileImageUrl() ? origin.getProfileImageUrl() : null)
+            .accessType(origin.getAccessType())
             .createdAt(origin.getCreatedAt())
             .updatedAt(origin.getUpdatedAt())
             .build();

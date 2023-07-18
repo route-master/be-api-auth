@@ -12,6 +12,7 @@ import org.routemaster.api.auth.domain.user.info.profile.impl.service.SecuredUse
 import org.routemaster.api.auth.domain.user.info.profile.impl.service.UserProfileAccessService;
 import org.routemaster.api.auth.domain.user.info.profile.impl.service.UserProfileService;
 import org.routemaster.api.auth.domain.user.jwt.impl.data.UserJwtPayload;
+import org.routemaster.api.auth.domain.user.jwt.impl.data.UserJwtUnit;
 import org.routemaster.api.auth.endpoint.user.info.profile.impl.service.UserProfileEndpointService;
 import org.routemaster.api.auth.endpoint.user.info.profile.impl.util.mapper.UserProfileAccessMapper;
 import org.routemaster.api.auth.endpoint.user.info.profile.impl.util.mapper.UserProfileMapper;
@@ -22,6 +23,7 @@ import org.routemaster.api.auth.endpoint.user.info.profile.impl.vo.response.User
 import org.routemaster.api.auth.endpoint.user.info.profile.impl.vo.response.UserProfileDetailsResponse;
 import org.routemaster.api.auth.endpoint.user.info.profile.impl.vo.response.UserProfileListResponse;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -55,7 +57,7 @@ public class DefaultUserProfileEndpointService implements UserProfileEndpointSer
     }
 
     @Override
-    public UserProfileListResponse list(Iterable<String> baseUserIds, UserJwtPayload payload) {
+    public UserProfileListResponse list(List<String> baseUserIds, UserJwtPayload payload) {
         List<UserProfile> userProfiles = securedUserProfileService.listByBaseUserId(baseUserIds);
         return UserProfileListResponse.builder()
             .profiles(userProfiles)
@@ -63,7 +65,7 @@ public class DefaultUserProfileEndpointService implements UserProfileEndpointSer
     }
 
     @Override
-    public UserNicknameListResponse nicknames(Iterable<String> baseUserIds, UserJwtPayload payload) {
+    public UserNicknameListResponse nicknames(List<String> baseUserIds, UserJwtPayload payload) {
         List<UserProfile> userProfiles = securedUserProfileService.listByBaseUserId(baseUserIds);
         List<UserNicknameResponse> nicknames = new ArrayList<>();
         for (UserProfile userProfile : userProfiles) {
@@ -89,6 +91,7 @@ public class DefaultUserProfileEndpointService implements UserProfileEndpointSer
     }
 
     @Override
+    @Transactional
     public UserProfileDetailsResponse save(UserJwtPayload payload,
         UserProfileTotalSaveRequest request) {
         String baseUserId = payload.getBaseUserId();
@@ -123,10 +126,15 @@ public class DefaultUserProfileEndpointService implements UserProfileEndpointSer
     }
 
     @Override
+    @Transactional
     public UserProfileDeleteResponse delete(UserJwtPayload payload) {
         userProfileService.deleteByBaseUserId(payload.getBaseUserId());
         userProfileAccessService.deleteByBaseUserId(payload.getBaseUserId());
         return UserProfileDeleteResponse.builder()
             .build();
+    }
+
+    private void validate(UserJwtPayload payload) {
+
     }
 }

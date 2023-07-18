@@ -69,20 +69,19 @@ public class DefaultEmailUserService implements EmailUserService {
     }
     @Override
     @Transactional
-    public void delete(String username) {
-        if (!emailUserRepository.existsByUsername(username)) {
+    public void delete(String id) {
+        if (!emailUserRepository.existsById(id)) {
             throw roeFactory.get(
                 UserErrorCode.ROE_101,
                 EmailUserErrorDescription.EMAIL_USER_NOT_FOUND,
                 HttpStatus.NOT_FOUND
             );
         }
-        emailUserRepository.deleteByUsername(username);
+        emailUserRepository.deleteById(id);
     }
 
     @Override
     public EmailUser detailsByUsername(String username) {
-        log.info("{}", username);
         return emailUserRepository.findByUsername(username)
             .orElseThrow(() -> roeFactory.get(
                 UserErrorCode.ROE_101,
