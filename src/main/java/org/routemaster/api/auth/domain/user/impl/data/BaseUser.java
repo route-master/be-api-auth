@@ -14,7 +14,6 @@ import java.util.Set;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @Getter
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class BaseUser {
 
     public static final String TYPE = BaseUser.class.getName();

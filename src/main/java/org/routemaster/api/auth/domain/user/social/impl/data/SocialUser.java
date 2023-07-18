@@ -18,12 +18,11 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Document(collation = "social_user")
+@Document(collection = "social_user")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @Getter
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class SocialUser implements DefaultUserDetails, Serializable {
 
     public static final UserType TYPE = UserType.SOCIAL_USER;

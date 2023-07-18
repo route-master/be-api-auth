@@ -31,8 +31,6 @@ public class DefaultBaseUserService implements BaseUserService {
 
     @Override
     public BaseUser details(UserType type, String userId) {
-        log.info("{}", type);
-        log.info("{}", userId);
         List<String> userIds = new ArrayList<>(Arrays.asList(userId));
         switch (type) {
             case EMAIL_USER: return baseUserRepository.findByEmailUsersIn(userIds)
