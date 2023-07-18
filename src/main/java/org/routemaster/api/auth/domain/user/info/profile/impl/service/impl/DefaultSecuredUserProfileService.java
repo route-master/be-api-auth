@@ -31,7 +31,7 @@ public class DefaultSecuredUserProfileService implements SecuredUserProfileServi
     private final ROEFactory roeFactory;
 
     @Override
-    public List<UserProfile> list(Iterable<String> ids) {
+    public List<UserProfile> list(List<String> ids) {
         List<UserProfile> origins = userProfileService.list(ids);
         Map<String, UserProfile> originMap = new HashMap<>();
         for (UserProfile origin : origins) {
@@ -48,7 +48,7 @@ public class DefaultSecuredUserProfileService implements SecuredUserProfileServi
     }
 
     @Override
-    public List<UserProfile> listByBaseUserId(Iterable<String> baseUserIds) {
+    public List<UserProfile> listByBaseUserId(List<String> baseUserIds) {
         List<UserProfile> origins = userProfileService.listByBaseUserId(baseUserIds);
         Map<String, UserProfile> originMap = new HashMap<>();
         for (UserProfile origin : origins) {
@@ -64,9 +64,10 @@ public class DefaultSecuredUserProfileService implements SecuredUserProfileServi
         return list(baseUserIds, originMap, accessMap);
     }
 
-    private List<UserProfile> list(Iterable<String> ids, Map<String, UserProfile> originMap,
+    private List<UserProfile> list(List<String> ids, Map<String, UserProfile> originMap,
         Map<String, UserProfileAccess> accessMap) {
         List<UserProfile> results = new ArrayList<>();
+
         for (String id : ids) {
 
             if (!originMap.containsKey(id)) {
