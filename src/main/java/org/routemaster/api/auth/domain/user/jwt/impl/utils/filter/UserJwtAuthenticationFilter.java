@@ -49,7 +49,6 @@ public class UserJwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
         FilterChain filterChain) throws ServletException, IOException {
         String token = parseBearerToken(request);
-        log.info("{}", token);
         if (token == null) {
             filterChain.doFilter(request, response);
             return;
@@ -64,7 +63,6 @@ public class UserJwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         UserJwtPayload payload = userJwtService.getPayload(token);
-        log.info("{}", payload);
         if (payload.getJwtType() != JwtType.ACCESS_TOKEN) {
             throw roeFactory.get(
                 UserErrorCode.ROE_102,
@@ -85,6 +83,15 @@ public class UserJwtAuthenticationFilter extends OncePerRequestFilter {
                 );
             }
         } catch (Exception e) {
+            throw roeFactory.get(
+                UserErrorCode.ROE_102,
+                UserJwtErrorDescription.INVALID_TOKEN,
+                HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        String refreshToken = userDetails.getRefreshToken();
+        if (refreshToken == null) {
             throw roeFactory.get(
                 UserErrorCode.ROE_102,
                 UserJwtErrorDescription.INVALID_TOKEN,

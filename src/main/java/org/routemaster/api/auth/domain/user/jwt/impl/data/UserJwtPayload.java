@@ -14,7 +14,6 @@ import org.routemaster.api.auth.domain.user.jwt.impl.utils.constant.JwtType;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @Getter
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class UserJwtPayload {
 
     private String baseUserId;

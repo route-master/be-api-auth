@@ -12,7 +12,6 @@ import org.routemaster.api.auth.global.domain.jwt.impl.vo.JwtUnit;
 @AllArgsConstructor
 @Builder
 @Getter
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class UserJwtUnit {
 
     private JwtUnit accessToken;
