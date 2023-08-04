@@ -76,6 +76,7 @@ public class DefaultUserJwtService implements UserJwtService {
 
     private UserJwtPayload toPayload(DefaultUserDetails typeUser, String baseUserId, JwtType jwtType) {
         return UserJwtPayload.builder()
+            .authorities(typeUser.getStringAuthorities())
             .baseUserId(baseUserId)
             .typeUserId(typeUser.getId())
             .userType(typeUser.getType())
