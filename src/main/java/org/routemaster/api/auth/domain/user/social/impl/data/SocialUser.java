@@ -95,6 +95,11 @@ public class SocialUser implements DefaultUserDetails, Serializable {
         return TYPE;
     }
 
+    @Override
+    public Set<String> getStringAuthorities() {
+        return authorities;
+    }
+
     public void setAuthorities(Set<String> authorities) {
         this.authorities = authorities;
         setUpdatedAt();

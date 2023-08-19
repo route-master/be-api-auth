@@ -3,6 +3,7 @@ spring:
     property-naming-strategy: LOWER_CAMEL_CASE
   config:
     import:
+      - prod/auth-client.yml
       - prod/mongodb.yml
       - prod/email.yml
       - prod/jwt.yml

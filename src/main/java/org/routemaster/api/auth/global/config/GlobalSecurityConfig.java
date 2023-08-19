@@ -33,7 +33,8 @@ public class GlobalSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http.csrf(AbstractHttpConfigurer::disable);
+        http.csrf(AbstractHttpConfigurer::disable)
+            .cors(cors -> cors.disable());
 
         http.addFilterAfter(userJwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
