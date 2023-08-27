@@ -1,5 +1,6 @@
 package org.routemaster.api.auth.global.config;
 
+import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.routemaster.api.auth.domain.user.jwt.impl.utils.filter.UserJwtAccessDeniedHandler;
 import org.routemaster.api.auth.domain.user.jwt.impl.utils.filter.UserJwtAuthenticationEntryPoint;
@@ -33,10 +34,25 @@ public class GlobalSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http.csrf(AbstractHttpConfigurer::disable)
-            .cors(cors -> cors.disable());
+        http.csrf(AbstractHttpConfigurer::disable);
 
         http.addFilterAfter(userJwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
+    }
+
+    @Bean
+    CorsConfigurationSource  corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList(
+            "http://route-master.org",
+            "http://www.route-master.org",
+            "https://route-master.org",
+            "https://www.route-master.org",
+            "http://localhost:3000"
+        ));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }
