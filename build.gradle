@@ -50,12 +50,12 @@ tasks.named('test') {
 }
 
 bootBuildImage {
-    imageName = System.getProperty("docker_id") + "/${project.name}"
+    imageName = System.getenv("docker_id") + "/${project.name}"
     publish = true
     docker {
         publishRegistry {
-            username = System.getProperty("docker_id")
-            password = System.getProperty("docker_pw")
+            username = System.getenv("docker_id")
+            password = System.getenv("docker_pw")
         }
     }
 }
