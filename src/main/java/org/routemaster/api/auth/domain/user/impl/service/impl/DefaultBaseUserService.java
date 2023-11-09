@@ -63,7 +63,11 @@ public class DefaultBaseUserService implements BaseUserService {
     @Override
     @Transactional
     public BaseUser save(UserType type, String id) {
-        return save(baseUserMapper.register(type, id));
+        try {
+            return details(type, id);
+        } catch (Exception e) {
+            return save(baseUserMapper.register(type, id));
+        }
     }
 
     @Override

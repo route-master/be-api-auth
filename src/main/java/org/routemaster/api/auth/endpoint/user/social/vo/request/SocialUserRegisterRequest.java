@@ -1,10 +1,14 @@
 package org.routemaster.api.auth.endpoint.user.social.vo.request;
 
+import java.util.List;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.routemaster.api.auth.endpoint.user.info.privacy.impl.vo.request.UserPrivacySaveAllRequest;
+import org.routemaster.api.auth.endpoint.user.info.privacy.impl.vo.request.UserPrivacySaveRequest;
+import org.routemaster.api.auth.endpoint.user.info.profile.impl.vo.request.UserProfileTotalSaveRequest;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -13,5 +17,6 @@ import lombok.NoArgsConstructor;
 public class SocialUserRegisterRequest {
 
     private String accessToken;
-    private Set<String> authorities;
+    private UserPrivacySaveAllRequest privacy;
+    private UserProfileTotalSaveRequest profile;
 }

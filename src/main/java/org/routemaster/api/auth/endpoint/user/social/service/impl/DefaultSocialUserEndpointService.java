@@ -1,10 +1,12 @@
 package org.routemaster.api.auth.endpoint.user.social.service.impl;
 
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.routemaster.api.auth.domain.user.impl.data.BaseUser;
 import org.routemaster.api.auth.domain.user.impl.exception.UserErrorCode;
 import org.routemaster.api.auth.domain.user.impl.service.BaseUserService;
+import org.routemaster.api.auth.domain.user.impl.util.constant.UserRole;
 import org.routemaster.api.auth.domain.user.impl.util.constant.UserType;
 import org.routemaster.api.auth.domain.user.jwt.impl.data.UserJwtPayload;
 import org.routemaster.api.auth.domain.user.jwt.impl.data.UserJwtUnit;
@@ -12,6 +14,10 @@ import org.routemaster.api.auth.domain.user.jwt.impl.service.UserJwtService;
 import org.routemaster.api.auth.domain.user.social.impl.data.SocialUser;
 import org.routemaster.api.auth.domain.user.social.impl.exception.SocialUserErrorDescription;
 import org.routemaster.api.auth.domain.user.social.impl.service.SocialUserService;
+import org.routemaster.api.auth.endpoint.user.info.privacy.impl.service.UserPrivacyEndpointService;
+import org.routemaster.api.auth.endpoint.user.info.privacy.impl.vo.response.UserPrivacySaveResponse;
+import org.routemaster.api.auth.endpoint.user.info.profile.impl.service.UserProfileEndpointService;
+import org.routemaster.api.auth.endpoint.user.info.profile.impl.vo.response.UserProfileDetailsResponse;
 import org.routemaster.api.auth.endpoint.user.social.service.SocialUserEndpointService;
 import org.routemaster.api.auth.endpoint.user.social.util.mapper.EndpointSocialUserMapper;
 import org.routemaster.api.auth.endpoint.user.social.vo.request.SocialUserLoginRequest;
@@ -38,11 +44,20 @@ public class DefaultSocialUserEndpointService implements SocialUserEndpointServi
     private final EndpointSocialUserMapper socialUserMapper;
     private final ROEFactory roeFactory;
 
+    private final UserProfileEndpointService userProfileEndpointService;
+    private final UserPrivacyEndpointService userPrivacyEndpointService;
+
     @Override
     public SocialUserRegisterResponse register(String provider, SocialUserRegisterRequest request) {
         Oauth2UserInfo userInfo = getUserInfo(provider, request.getAccessToken());
-        SocialUser socialUser = socialUserService.register(provider, userInfo.getId(), request.getAuthorities());
-        baseUserService.save(UserType.SOCIAL_USER, socialUser.getId());
+        SocialUser socialUser = socialUserService.register(provider, userInfo.getId(), Set.of(
+            UserRole.ROLE_USER));
+        BaseUser baseUser = baseUserService.save(UserType.SOCIAL_USER, socialUser.getId());
+
+        UserJwtPayload payload = UserJwtPayload.of(socialUser, baseUser);
+        UserProfileDetailsResponse profile = userProfileEndpointService.save(payload, request.getProfile());
+        UserPrivacySaveResponse privacy = userPrivacyEndpointService.saveAll(payload, request.getPrivacy());
+
         return SocialUserRegisterResponse.builder()
             .id(socialUser.getId())
             .provider(socialUser.getProvider())

@@ -37,13 +37,6 @@ public class DefaultEmailUserReadyService implements EmailUserReadyService {
     public EmailUserReady register(EmailUserReady user) {
         String username = user.getUsername();
 
-        if (emailUserRepository.existsByUsername(username)) {
-            throw roeFactory.get(
-                UserErrorCode.ROE_100,
-                EmailUserErrorDescription.EMAIL_USER_ALREADY_EXIST,
-                HttpStatus.BAD_REQUEST);
-        }
-
         Optional<EmailUserReady> prev = emailUserReadyRepository.findByUsername(username);
         EmailUserReady basicUserReady = prev.isEmpty() ? emailUserReadyMapper.register(user)
             : emailUserReadyMapper.register(prev.get(), user);

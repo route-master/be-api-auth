@@ -14,6 +14,7 @@ import org.routemaster.api.auth.domain.user.impl.util.constant.UserType;
 import org.routemaster.api.auth.domain.user.jwt.impl.data.UserJwtPayload;
 import org.routemaster.api.auth.domain.user.jwt.impl.data.UserJwtUnit;
 import org.routemaster.api.auth.domain.user.jwt.impl.service.UserJwtService;
+import org.routemaster.api.auth.endpoint.privacy.impl.service.PrivacyEndpointService;
 import org.routemaster.api.auth.endpoint.user.email.impl.service.EmailUserEndpointService;
 import org.routemaster.api.auth.endpoint.user.email.impl.util.mapper.EndpointEmailUserReadyMapper;
 import org.routemaster.api.auth.endpoint.user.email.impl.vo.request.EmailUserLoginRequest;
@@ -24,6 +25,11 @@ import org.routemaster.api.auth.endpoint.user.email.impl.vo.response.EmailUserLo
 import org.routemaster.api.auth.endpoint.user.email.impl.vo.response.EmailUserRegisterResponse;
 import org.routemaster.api.auth.endpoint.user.email.impl.vo.response.EmailUserUpdatePasswordResponse;
 import org.routemaster.api.auth.endpoint.user.email.impl.vo.response.EmailUserVerificationResponse;
+import org.routemaster.api.auth.endpoint.user.info.privacy.impl.service.UserPrivacyEndpointService;
+import org.routemaster.api.auth.endpoint.user.info.privacy.impl.vo.response.UserPrivacySaveResponse;
+import org.routemaster.api.auth.endpoint.user.info.profile.impl.service.UserProfileEndpointService;
+import org.routemaster.api.auth.endpoint.user.info.profile.impl.service.impl.DefaultUserProfileEndpointService;
+import org.routemaster.api.auth.endpoint.user.info.profile.impl.vo.response.UserProfileDetailsResponse;
 import org.routemaster.sdk.exception.data.roe.ROEFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,6 +42,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class DefaultEmailUserEndpointService implements EmailUserEndpointService {
 
     private final EndpointEmailUserReadyMapper endpointEmailUserReadyMapper;
+    private final UserProfileEndpointService userProfileEndpointService;
+    private final UserPrivacyEndpointService userPrivacyEndpointService;
 
     private final UserJwtService userJwtService;
     private final BaseUserService baseUserService;
@@ -48,7 +56,11 @@ public class DefaultEmailUserEndpointService implements EmailUserEndpointService
     @Transactional
     public EmailUserRegisterResponse register(EmailUserRegisterRequest request) {
         EmailUserReady emailUserReady = emailUserReadyService.register(endpointEmailUserReadyMapper.register(request));
-
+        EmailUser emailUser = emailUserService.register(emailUserReady.getUsername(), emailUserReady.getPassword());
+        BaseUser baseUser = baseUserService.save(UserType.EMAIL_USER, emailUser.getId());
+        UserJwtPayload payload = UserJwtPayload.of(emailUser, baseUser);
+        UserProfileDetailsResponse profile = userProfileEndpointService.save(payload, request.getProfile());
+        UserPrivacySaveResponse privacy = userPrivacyEndpointService.saveAll(payload, request.getPrivacy());
         return EmailUserRegisterResponse.builder()
             .username(emailUserReady.getUsername())
             .build();
@@ -58,7 +70,6 @@ public class DefaultEmailUserEndpointService implements EmailUserEndpointService
     @Transactional
     public EmailUserVerificationResponse verifyRegister(EmailUserVerificationRequest request) {
         EmailUser emailUser = emailUserService.verifyRegister(request.getUsername(), request.getVerificationCode());
-        baseUserService.save(UserType.EMAIL_USER, emailUser.getId());
 
         return EmailUserVerificationResponse.builder()
             .username(emailUser.getUsername())
@@ -69,6 +80,7 @@ public class DefaultEmailUserEndpointService implements EmailUserEndpointService
     @Transactional
     public EmailUserLoginResponse login(EmailUserLoginRequest request) {
         EmailUser emailUser = emailUserService.detailsByUsername(request.getUsername());
+        log.info("EmailUser: {}", emailUser);
         if (!passwordEncoder.matches(request.getPassword(), emailUser.getPassword())) {
             throw roeFactory.get(
                 UserErrorCode.ROE_102,

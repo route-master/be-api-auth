@@ -63,25 +63,18 @@ public class UserJwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         UserJwtPayload payload = userJwtService.getPayload(token);
-        if (payload.getJwtType() != JwtType.ACCESS_TOKEN) {
-            throw roeFactory.get(
-                UserErrorCode.ROE_102,
-                UserJwtErrorDescription.INVALID_TOKEN,
-                HttpStatus.UNAUTHORIZED
-            );
-        }
 
         DefaultUserDetails userDetails;
         try {
-            switch (payload.getUserType()) {
-                case EMAIL_USER: userDetails = emailUserService.details(payload.getTypeUserId()); break;
-                case SOCIAL_USER: userDetails = socialUserService.details(payload.getTypeUserId()); break;
-                default: throw roeFactory.get(
+            userDetails = switch (payload.getUserType()) {
+                case EMAIL_USER -> emailUserService.details(payload.getTypeUserId());
+                case SOCIAL_USER -> socialUserService.details(payload.getTypeUserId());
+                default -> throw roeFactory.get(
                     UserErrorCode.ROE_102,
                     UserJwtErrorDescription.INVALID_TOKEN,
                     HttpStatus.UNAUTHORIZED
                 );
-            }
+            };
         } catch (Exception e) {
             throw roeFactory.get(
                 UserErrorCode.ROE_102,
@@ -90,13 +83,14 @@ public class UserJwtAuthenticationFilter extends OncePerRequestFilter {
             );
         }
 
-        String refreshToken = userDetails.getRefreshToken();
-        if (refreshToken == null) {
-            throw roeFactory.get(
-                UserErrorCode.ROE_102,
-                UserJwtErrorDescription.INVALID_TOKEN,
-                HttpStatus.UNAUTHORIZED
-            );
+        if (payload.getJwtType() == JwtType.REFRESH_TOKEN) {
+            if (!userDetails.getRefreshToken().equals(token)) {
+                throw roeFactory.get(
+                    UserErrorCode.ROE_102,
+                    UserJwtErrorDescription.INVALID_TOKEN,
+                    HttpStatus.UNAUTHORIZED
+                );
+            }
         }
 
         request.setAttribute(USER_PAYLOAD, payload);
