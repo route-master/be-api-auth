@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.routemaster.api.auth.domain.user.email.impl.service.EmailUserService;
 import org.routemaster.api.auth.domain.user.impl.data.BaseUser;
+import org.routemaster.api.auth.domain.user.impl.data.DefaultUserDetails;
 import org.routemaster.api.auth.domain.user.impl.exception.UserErrorCode;
 import org.routemaster.api.auth.domain.user.impl.service.BaseUserService;
 import org.routemaster.api.auth.domain.user.info.privacy.impl.service.UserPrivacyService;
@@ -11,7 +12,10 @@ import org.routemaster.api.auth.domain.user.info.profile.impl.service.UserProfil
 import org.routemaster.api.auth.domain.user.info.profile.impl.service.UserProfileService;
 import org.routemaster.api.auth.domain.user.info.setting.impl.service.UserSettingService;
 import org.routemaster.api.auth.domain.user.jwt.impl.data.UserJwtPayload;
+import org.routemaster.api.auth.domain.user.jwt.impl.data.UserJwtUnit;
 import org.routemaster.api.auth.domain.user.jwt.impl.exception.UserJwtErrorDescription;
+import org.routemaster.api.auth.domain.user.jwt.impl.service.UserJwtService;
+import org.routemaster.api.auth.domain.user.jwt.impl.utils.constant.JwtType;
 import org.routemaster.api.auth.domain.user.social.impl.service.SocialUserService;
 import org.routemaster.api.auth.endpoint.user.impl.service.UserEndpointService;
 import org.routemaster.sdk.exception.data.roe.ROEFactory;
@@ -32,6 +36,7 @@ public class DefaultUserEndpointService implements UserEndpointService {
     private final EmailUserService emailUserService;
     private final SocialUserService socialUserService;
     private final ROEFactory roeFactory;
+    private final UserJwtService userJwtService;
 
     @Override
     public void logout(UserJwtPayload payload) {
@@ -48,6 +53,44 @@ public class DefaultUserEndpointService implements UserEndpointService {
                 HttpStatus.UNAUTHORIZED
             );
         }
+    }
+
+    @Override
+    public UserJwtUnit refresh(UserJwtPayload payload) {
+        if (payload.getJwtType() != JwtType.REFRESH_TOKEN) {
+            throw roeFactory.get(
+                UserErrorCode.ROE_102,
+                UserJwtErrorDescription.INVALID_TOKEN,
+                HttpStatus.UNAUTHORIZED
+            );
+        }
+        BaseUser baseUser = baseUserService.details(payload.getBaseUserId());
+        DefaultUserDetails userDetails = switch (payload.getUserType()) {
+            case EMAIL_USER -> emailUserService.details(payload.getTypeUserId());
+            case SOCIAL_USER -> socialUserService.details(payload.getTypeUserId());
+            default -> throw roeFactory.get(
+                UserErrorCode.ROE_102,
+                UserJwtErrorDescription.INVALID_TOKEN,
+                HttpStatus.UNAUTHORIZED
+            );
+        };
+        UserJwtUnit unit = userJwtService.createTokens(userDetails, baseUser.getId());
+
+        switch (payload.getUserType()) {
+            case EMAIL_USER:
+                emailUserService.updateRefreshToken(payload.getTypeUserId(), unit.getRefreshToken().getToken());
+                break;
+            case SOCIAL_USER:
+                socialUserService.updateRefreshToken(payload.getTypeUserId(), unit.getRefreshToken().getToken());
+                break;
+            default: throw roeFactory.get(
+                UserErrorCode.ROE_102,
+                UserJwtErrorDescription.INVALID_TOKEN,
+                HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        return unit;
     }
 
     @Override

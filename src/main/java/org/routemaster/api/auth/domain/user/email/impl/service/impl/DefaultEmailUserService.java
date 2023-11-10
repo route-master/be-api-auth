@@ -30,15 +30,27 @@ public class DefaultEmailUserService implements EmailUserService {
 
     @Override
     @Transactional
-    public EmailUser verifyRegister(String username, String verificationCode) {
+    public EmailUser register(String username, String password) {
         if (emailUserRepository.existsByUsername(username)) {
-            throw roeFactory.get(
-                UserErrorCode.ROE_100,
-                EmailUserErrorDescription.EMAIL_USER_ALREADY_EXIST,
-                HttpStatus.BAD_REQUEST
-            );
+            EmailUser emailUser = detailsByUsername(username);
+            if (emailUser.getAuthorities() == null || emailUser.getAuthorities().isEmpty()) {
+                return emailUserRepository.save(emailUserMapper.register(
+                    emailUser.getId(), emailUser.getUsername(), emailUser.getPassword()));
+            } else {
+                throw roeFactory.get(
+                    UserErrorCode.ROE_100,
+                    EmailUserErrorDescription.EMAIL_USER_ALREADY_EXIST,
+                    HttpStatus.BAD_REQUEST
+                );
+            }
         }
+        EmailUser emailUser = emailUserMapper.register(username, password);
+        return emailUserRepository.save(emailUser);
+    }
 
+    @Override
+    @Transactional
+    public EmailUser verifyRegister(String username, String verificationCode) {
         EmailUserReady emailUserReady = emailUserReadyRepository.findByUsernameAndVerificationCode(username, verificationCode)
             .orElseThrow(() -> roeFactory.get(
                 UserErrorCode.ROE_102,
@@ -46,8 +58,13 @@ public class DefaultEmailUserService implements EmailUserService {
                 HttpStatus.UNAUTHORIZED
             ));
 
-        EmailUser emailUser = emailUserMapper.register(emailUserReady);
-        return emailUserRepository.save(emailUser);
+        EmailUser emailUser = emailUserRepository.findByUsername(username)
+            .orElseThrow(() -> roeFactory.get(
+                UserErrorCode.ROE_101,
+                EmailUserErrorDescription.EMAIL_USER_NOT_FOUND,
+                HttpStatus.NOT_FOUND
+            ));
+        return emailUserRepository.save(emailUser.ready(emailUserReady));
     }
 
 

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import lombok.*;
 import org.routemaster.api.auth.domain.user.impl.data.DefaultUserDetails;
 import org.routemaster.api.auth.domain.user.impl.util.constant.UserTime;
@@ -53,13 +54,18 @@ public class EmailUser implements DefaultUserDetails, Serializable {
     @Field(name = "refresh_token")
     private String refreshToken;
 
+    public EmailUser ready(EmailUserReady ready) {
+        this.authorities = ready.getAuthorities();
+        this.password = ready.getPassword();
+        return this;
+    }
+
     @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        LocalDateTime.now();
-        return authorities.stream()
+        return Objects.nonNull(authorities) ? authorities.stream()
                 .map(authority -> new SimpleGrantedAuthority(authority))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toSet()) : null;
     }
 
     @JsonProperty("authorities")

@@ -51,7 +51,7 @@ public class DefaultSocialUserService implements SocialUserService {
             throw roeFactory.get(
                 UserErrorCode.ROE_100,
                 SocialUserErrorDescription.SOCIAL_USER_ALREADY_EXIST,
-                HttpStatus.BAD_REQUEST
+                HttpStatus.CONFLICT
             );
         }
         SocialUser socialUser = socialUserMapper.register(provider, socialId, authorities);

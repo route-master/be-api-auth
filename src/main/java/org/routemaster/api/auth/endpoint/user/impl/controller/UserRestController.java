@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.routemaster.api.auth.domain.user.impl.data.DefaultUserDetails;
 import org.routemaster.api.auth.domain.user.jwt.impl.data.UserJwtPayload;
+import org.routemaster.api.auth.domain.user.jwt.impl.data.UserJwtUnit;
 import org.routemaster.api.auth.domain.user.jwt.impl.utils.filter.UserJwtAuthenticationFilter;
 import org.routemaster.api.auth.endpoint.user.impl.service.ClientUserEndpointService;
 import org.routemaster.api.auth.endpoint.user.impl.service.UserEndpointService;
@@ -43,10 +44,19 @@ public class UserRestController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @PatchMapping("/refresh")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public ResponseEntity<UserJwtUnit> refresh(
+        @RequestAttribute(UserJwtAuthenticationFilter.USER_PAYLOAD) UserJwtPayload payload) {
+        UserJwtUnit unit = userEndpointService.refresh(payload);
+        return new ResponseEntity<>(unit, HttpStatus.OK);
+    }
+
     @DeleteMapping
     @SecurityRequirement(name = "Bearer Authentication")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<Void> delete(
+    public ResponseEntity<UserJwtUnit> delete(
         @RequestAttribute(UserJwtAuthenticationFilter.USER_PAYLOAD) UserJwtPayload payload) {
         userEndpointService.delete(payload);
         return new ResponseEntity<>(null, HttpStatus.OK);
